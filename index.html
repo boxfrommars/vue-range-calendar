@@ -8,7 +8,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>Starter Template for Bootstrap</title>
+  <title>Vue Range Calendar</title>
 
   <link href="/bower_components/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
   <link href="/bower_components/font-awesome/css/font-awesome.css" rel="stylesheet">
@@ -38,7 +38,9 @@
     }
 
     .rk-range-calendar .rk-day {
-      padding: 5px;
+      padding: 0 5px;
+      height: 30px;
+      line-height: 30px;
       border: 1px solid #eee;
       border-width: 1px 1px 0 0;
       display: inline-block;
@@ -49,49 +51,79 @@
       text-decoration: none;
       font-size: .9em;
     }
+
+    .rk-range-calendar .rk-week {
+      height: 30px;
+      line-height: 30px;
+      display: inline-block;
+      width: 100%;
+      text-align: left;
+      box-sizing: border-box;
+      text-decoration: none;
+      font-size: 1.2em;
+    }
+
+    .rk-range-calendar .rk-day-muted {
+      background: #eee;
+      color: #999;
+    }
   </style>
 </head>
 
 <body>
-  <div class="container">
+<div class="container">
 
-    <h2>Calendar</h2>
-    <hr/>
-    <!-- Button trigger modal -->
-    <div id="calendar" class="panel panel-default rk-range-calendar">
-      <div class="panel-heading">
-        <div class="btn-group" role="group" aria-label="...">
-          <a class="btn btn-default" @click="setYear(year - 1)"><i class="fa fa-chevron-left"></i></a>
-          <button type="button" class="btn btn-default">{{ year }}</button>
-          <a class="btn btn-default" @click="setYear(year + 1)"><i class="fa fa-chevron-right"></i></a>
-        </div>
+  <h2>Calendar</h2>
+  <hr/>
+
+
+  <div id="calendar" class="panel panel-default rk-range-calendar">
+    <div class="panel-heading">
+      <!--Year-->
+      <div class="btn-group" role="group" aria-label="...">
+        <a class="btn btn-default" @click="setYear(year - 1)"><i class="fa fa-chevron-left"></i></a>
+        <button type="button" class="btn btn-default">{{ year }}</button>
+        <a class="btn btn-default" @click="setYear(year + 1)"><i class="fa fa-chevron-right"></i></a>
       </div>
+    </div>
 
-      <div class="panel-body">
-        <div class="row">
-          <div class="col-md-2">
-            <ul class="nav nav-pills">
-              <li v-for="quarter in quarters" :title="quarter.key.year"><a>{{ quarter.title }}</a></li>
-            </ul>
-          </div>
-          <div class="col-md-5">
-            <ul class="nav nav-pills">
-              <li v-for="month in months" style="width: 30%; text-align: center"><a>{{ month.title }}</a></li>
-            </ul>
-          </div>
-          <div class="col-md-5">
-            <div class="panel panel-default rk-calendar">
-              <div class="panel-heading">
-                {{ currentMonthTitle }}
-              </div>
-              <div class="panel-body">
-                <div class="row">
-                  <div class="col-md-2">
-                  </div>
-                  <div class="col-md-10">
-                    <div class="rk-days">
-                      <a v-for="day in days" class="rk-day">{{ day.title }}</a>
-                    </div>
+    <div class="panel-body">
+      <div class="row">
+
+        <!--Quarters-->
+        <div class="col-md-2">
+          <ul class="nav nav-pills">
+            <li v-for="quarter in quarters" :title="quarter.key.year"><a>{{ quarter.title }}</a></li>
+          </ul>
+        </div>
+
+        <!--Months-->
+        <div class="col-md-5">
+          <ul class="nav nav-pills">
+            <li v-for="month in months" style="width: 30%; text-align: center"><a>{{ month.title }}</a></li>
+          </ul>
+        </div>
+
+        <!--Days-->
+        <div class="col-md-5">
+          <div class="panel panel-default rk-calendar">
+            <div class="panel-heading">
+
+              <a class="pull-left" @click="setMonth(currentMonth - 1)"><i class="fa fa-chevron-left"></i></a>
+              {{ currentMonthTitle }}
+              <a class="pull-right" @click="setMonth(currentMonth + 1)"><i class="fa fa-chevron-right"></i></a>
+            </div>
+            <div class="panel-body">
+              <div class="row">
+                <div class="col-md-2">
+                  <a v-for="week in weeks" class="rk-week">
+                    <i class="fa fa-check-square-o" v-bind:class="{hidden: week%2}"></i>
+                    <i class="fa fa-square-o" v-bind:class="{hidden: !(week%2)}"></i>
+                  </a>
+                </div>
+                <div class="col-md-10">
+                  <div class="rk-days">
+                    <a v-for="day in days" class="rk-day" v-bind:class="{'rk-day-muted': !day.isCurrentMonth}">{{ day.title }}</a>
                   </div>
                 </div>
               </div>
@@ -99,123 +131,34 @@
           </div>
         </div>
       </div>
-
-      <div class="panel-footer">
-
-      </div>
-
     </div>
+
+    <div class="panel-footer">
+      <form class="form-inline" style="text-align: center">
+        <div class="form-group">
+          <input type="date" class="form-control" id="periodStart">
+        </div>
+        <div class="form-group">
+          <label for="periodEnd">&mdash;</label>
+          <input type="date" class="form-control" id="periodEnd">
+        </div>
+        <button type="submit" class="btn btn-primary pull-right">Done</button>
+        <button type="button" class="btn btn-default pull-left">Cancel</button>
+      </form>
+    </div>
+
   </div>
+</div>
 
-  <script src="/bower_components/jquery/dist/jquery.js"></script>
-  <script src="/bower_components/vue/dist/vue.js"></script>
-  <script src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>
-  <script src="/bower_components/moment/moment.js"></script>
-  <script src="/bower_components/moment/locale/ru.js"></script>
-  <script src="/bower_components/moment-range/dist/moment-range.js"></script>
+<script src="/bower_components/jquery/dist/jquery.js"></script>
+<script src="/bower_components/vue/dist/vue.js"></script>
+<script src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>
+<script src="/bower_components/moment/moment.js"></script>
+<script src="/bower_components/moment/locale/ru.js"></script>
+<script src="/bower_components/moment-range/dist/moment-range.js"></script>
 
-  <script>
-    moment.locale('en');
+<script>
 
-    var locale = {
-      quarter: {
-        ru: 'квартал',
-        en: 'quarter'
-      }
-    };
-
-    var _t = function (name) {
-      return locale[name][moment.locale()];
-    };
-
-    var generateQuarters = function (year) {
-      return [1, 2, 3, 4].map(function (quarterNum) {
-        return {
-          code: year + '-' + quarterNum,
-          title: 'Q. ' + quarterNum, // + ' ' + _t('quarter'),
-          key: {
-            year: year,
-            quarter: quarterNum
-          }
-        };
-      })
-    };
-
-    var generateMonths = function (year) {
-      return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function (monthNum) {
-        return {
-          title: moment(year + '-' + monthNum, 'YYYY-M').format('MM/YYYY'),
-          code: year + '-' + monthNum,
-          key: {
-            year: year,
-            month: monthNum
-          }
-        };
-      });
-    };
-
-    var generateDays = function (year, month) {
-      console.log(year, month);
-
-      var startDay = moment(year + '/' + month, 'YYYY/M').startOf('month').startOf('week');
-      var endDay = moment(year + '/' + month, 'YYYY/M').endOf('month').endOf('week');
-
-      var days = [];
-
-      moment()
-        .range(startDay, endDay)
-        .by('days', function (day) {
-          days.push({
-            title: day.format('D'),
-            code: day.format('YYYY-MM-DD')
-          });
-        });
-
-      return days;
-    };
-
-    new Vue({
-      el: '#calendar',
-      data: function () {
-        var currentDate = moment();
-        var currentYear = currentDate.get('year');
-        var currentMonth = currentDate.get('month') + 1;
-
-        return {
-          year: currentYear,
-          currentMonthTitle: currentDate.format('MMMM, YYYY'),
-          currentMonth: currentMonth,
-
-          quarters: [],
-          months: [],
-          days: []
-        };
-      },
-
-      methods: {
-        setYear: function (year) {
-          this.year = year;
-        }
-      },
-
-      computed: {
-        quarters: function () {
-          console.log('computed quarters for ' + this.year);
-          return generateQuarters(this.year);
-        },
-
-        months: function () {
-          console.log('computed months for ' + this.year);
-          return generateMonths(this.year);
-        },
-
-        days: function () {
-          console.log('computed for for ' + this.year + '/' + this.currentMonth);
-          return generateDays(this.year, this.currentMonth);
-        }
-      }
-    });
-
-  </script>
+</script>
 </body>
 </html>

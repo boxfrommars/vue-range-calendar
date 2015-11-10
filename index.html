@@ -10,14 +10,18 @@
 
   <title>Vue Range Calendar</title>
 
-  <link href="/bower_components/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
-  <link href="/bower_components/font-awesome/css/font-awesome.css" rel="stylesheet">
+  <link href="bower_components/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+  <link href="bower_components/font-awesome/css/font-awesome.css" rel="stylesheet">
 
   <style>
     #calendar {
       border: 1px solid #ccc;
       width: 800px;
       margin: 50px auto;
+    }
+
+    .rk-range-calendar > .panel-body {
+      height: 300px;
     }
 
     .rk-range-calendar .panel-heading {
@@ -28,13 +32,29 @@
       cursor: pointer;
     }
 
+    .rk-range-calendar .nav-pills li a {
+      border-radius: 0;
+      border: 1px solid #fff;
+    }
+
+    .rk-range-calendar .nav-pills li.today a {
+      border-color: orange;
+    }
+
+    .rk-range-calendar .nav-pills li.partially-active a {
+      background-color: rgba(51, 122, 183, 0.18);
+    }
+
+    .rk-range-calendar .nav-pills li.active.partially-active a {
+      background-color: #337ab7;
+    }
+
     .rk-range-calendar .rk-calendar .panel-heading {
       text-align: center;
     }
 
     .rk-range-calendar .rk-days {
       border: 1px solid #eee;
-      border-width: 0 0 1px 1px;
     }
 
     .rk-range-calendar .rk-day {
@@ -42,7 +62,7 @@
       height: 30px;
       line-height: 30px;
       border: 1px solid #eee;
-      border-width: 1px 1px 0 0;
+      /*border-width: 1px 1px 0 0;*/
       display: inline-block;
       width: 14%;
       text-align: center;
@@ -67,6 +87,32 @@
       background: #eee;
       color: #999;
     }
+
+    .rk-range-calendar .rk-quarters > li + li,
+    .rk-range-calendar .rk-months > li + li
+    {
+      margin-left: 0;
+    }
+    .rk-range-calendar .rk-months >li {
+      width: 30%;
+      text-align: center;
+    }
+
+    .rk-range-calendar .rk-day.active {
+      background-color: #337ab7;
+      color: #fff;
+    }
+
+    .rk-range-calendar .disable-text-select {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    .rk-range-calendar .today {
+      border-color: orange;
+    }
   </style>
 </head>
 
@@ -82,25 +128,30 @@
       <!--Year-->
       <div class="btn-group" role="group" aria-label="...">
         <a class="btn btn-default" @click="setYear(year - 1)"><i class="fa fa-chevron-left"></i></a>
-        <button type="button" class="btn btn-default">{{ year }}</button>
+        <button type="button" class="btn btn-default" @click="selectYear(year)">{{ year }}</button>
         <a class="btn btn-default" @click="setYear(year + 1)"><i class="fa fa-chevron-right"></i></a>
       </div>
     </div>
 
-    <div class="panel-body">
+    <div class="panel-body disable-text-select">
       <div class="row">
 
         <!--Quarters-->
         <div class="col-md-2">
-          <ul class="nav nav-pills">
-            <li v-for="quarter in quarters" :title="quarter.key.year"><a>{{ quarter.title }}</a></li>
+          <ul class="nav nav-pills rk-quarters">
+            <li v-for="quarter in quarters" :class="{active: isRangeSelected(quarter.range), 'partially-active': isRangePartiallySelected(quarter.range)}">
+              <a @click="selectQuarter(quarter)">{{ quarter.title }}</a>
+            </li>
           </ul>
         </div>
 
         <!--Months-->
         <div class="col-md-5">
-          <ul class="nav nav-pills">
-            <li v-for="month in months" style="width: 30%; text-align: center"><a>{{ month.title }}</a></li>
+          <ul class="nav nav-pills rk-months">
+            <li v-for="month in months"
+                :class="{active: isRangeSelected(month.range), 'partially-active': isRangePartiallySelected(month.range), today: month.isToday}">
+              <a @click="selectMonth(month)">{{ month.title }}</a>
+            </li>
           </ul>
         </div>
 
@@ -116,14 +167,18 @@
             <div class="panel-body">
               <div class="row">
                 <div class="col-md-2">
-                  <a v-for="week in weeks" class="rk-week">
-                    <i class="fa fa-check-square-o" v-bind:class="{hidden: week%2}"></i>
-                    <i class="fa fa-square-o" v-bind:class="{hidden: !(week%2)}"></i>
+                  <a v-for="week in weeks" class="rk-week" @click="selectWeek(week)">
+                    <i class="fa fa-circle" :class="{hidden: !isRangeSelected(week.range)}"></i>
+                    <i class="fa fa-circle-o" :class="{hidden: isRangeSelected(week.range) || isRangePartiallySelected(week.range)}"></i>
+                    <i class="fa fa-dot-circle-o" :class="{hidden: isRangeSelected(week.range) || !isRangePartiallySelected(week.range)}"></i>
                   </a>
                 </div>
                 <div class="col-md-10">
                   <div class="rk-days">
-                    <a v-for="day in days" class="rk-day" v-bind:class="{'rk-day-muted': !day.isCurrentMonth}">{{ day.title }}</a>
+                    <a v-for="day in days"
+                       @click="selectDay(day)"
+                       :class="{active: isRangeSelected(day.range), 'rk-day-muted': !day.isCurrentMonth, today: day.isToday}"
+                       class="rk-day">{{ day.title }}</a>
                   </div>
                 </div>
               </div>
@@ -136,11 +191,11 @@
     <div class="panel-footer">
       <form class="form-inline" style="text-align: center">
         <div class="form-group">
-          <input type="date" class="form-control" id="periodStart">
+          <input type="text" class="form-control" id="periodStart" v-model="selectedPeriodStart | momentStart" />
         </div>
         <div class="form-group">
           <label for="periodEnd">&mdash;</label>
-          <input type="date" class="form-control" id="periodEnd">
+          <input type="text" class="form-control" id="periodEnd" v-model="selectedPeriodEnd | momentEnd" />
         </div>
         <button type="submit" class="btn btn-primary pull-right">Done</button>
         <button type="button" class="btn btn-default pull-left">Cancel</button>
@@ -150,15 +205,13 @@
   </div>
 </div>
 
-<script src="/bower_components/jquery/dist/jquery.js"></script>
-<script src="/bower_components/vue/dist/vue.js"></script>
-<script src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>
-<script src="/bower_components/moment/moment.js"></script>
-<script src="/bower_components/moment/locale/ru.js"></script>
-<script src="/bower_components/moment-range/dist/moment-range.js"></script>
+<script src="bower_components/jquery/dist/jquery.js"></script>
+<script src="bower_components/vue/dist/vue.js"></script>
+<script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+<script src="bower_components/moment/moment.js"></script>
+<script src="bower_components/moment/locale/ru.js"></script>
+<script src="bower_components/moment-range/dist/moment-range.js"></script>
+<script src="calendar.js"></script>
 
-<script>
-
-</script>
 </body>
 </html>

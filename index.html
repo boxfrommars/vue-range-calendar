@@ -12,7 +12,6 @@
 
   <link href="bower_components/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
   <link href="bower_components/font-awesome/css/font-awesome.css" rel="stylesheet">
-  <link href="style.css" rel="stylesheet">
 </head>
 
 <body>
@@ -22,103 +21,16 @@
   <rk-range-calendar></rk-range-calendar>
 </div>
 
-
-<template id="rk-range-calendar">
-
-  <div id="calendar" class="panel panel-default rk-range-calendar">
-    <div class="panel-heading">
-      <!--Year-->
-      <div class="btn-group" role="group" aria-label="...">
-        <a class="btn btn-default" @click="setYear(year - 1)"><i class="fa fa-chevron-left"></i></a>
-        <button type="button" class="btn btn-default" @click="selectYear(year)">{{ year }}</button>
-        <a class="btn btn-default" @click="setYear(year + 1)"><i class="fa fa-chevron-right"></i></a>
-      </div>
-    </div>
-
-    <div class="panel-body disable-text-select">
-      <div class="row">
-
-        <!--Quarters-->
-        <div class="col-md-2">
-          <ul class="nav nav-pills rk-quarters">
-            <li v-for="quarter in quarters" :class="{active: isRangeSelected(quarter.range), 'partially-active': isRangePartiallySelected(quarter.range)}">
-              <a @click="selectQuarter(quarter)">{{ quarter.title }}</a>
-            </li>
-          </ul>
-        </div>
-
-        <!--Months-->
-        <div class="col-md-5">
-          <ul class="nav nav-pills rk-months">
-            <li v-for="month in months"
-                :class="{active: isRangeSelected(month.range), 'partially-active': isRangePartiallySelected(month.range), today: month.isToday}">
-              <a @click="selectMonth(month)" class="text-capitalize">{{ month.title }}</a>
-            </li>
-          </ul>
-        </div>
-
-        <!--Days-->
-        <div class="col-md-5">
-          <div class="panel panel-default rk-calendar">
-            <div class="panel-heading">
-
-              <a class="pull-left" @click="setMonth(currentMonth - 1)"><i class="fa fa-chevron-left"></i></a>
-              <span class="text-capitalize">{{ currentMonthTitle }}</span>
-              <a class="pull-right" @click="setMonth(currentMonth + 1)"><i class="fa fa-chevron-right"></i></a>
-            </div>
-            <div class="panel-body">
-              <div class="row">
-                <div class="col-md-2">
-                  <a v-for="week in weeks" class="rk-week" @click="selectWeek(week)">
-                    <i class="fa fa-circle" :class="{hidden: !isRangeSelected(week.range)}"></i>
-                    <i class="fa fa-circle-o" :class="{hidden: isRangeSelected(week.range) || isRangePartiallySelected(week.range)}"></i>
-                    <i class="fa fa-dot-circle-o" :class="{hidden: isRangeSelected(week.range) || !isRangePartiallySelected(week.range)}"></i>
-                  </a>
-                </div>
-                <div class="col-md-10">
-                  <div class="rk-days">
-                    <a v-for="day in days"
-                       @click="selectDay(day)"
-                       :class="{active: isRangeSelected(day.range), 'rk-day-muted': !day.isCurrentMonth, today: day.isToday}"
-                       class="rk-day">{{ day.title }}</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="panel-footer">
-      <form class="form-inline" style="text-align: center">
-        <div class="form-group">
-          <input type="text" class="form-control" id="periodStart" v-model="selectedPeriodStart | momentStart" />
-        </div>
-        <div class="form-group">
-          <label for="periodEnd">&mdash;</label>
-          <input type="text" class="form-control" id="periodEnd" v-model="selectedPeriodEnd | momentEnd" />
-        </div>
-        <button type="submit" class="btn btn-primary pull-right">{{ lang.done }}</button>
-        <button type="button" class="btn btn-default pull-left">{{ lang.cancel }}</button>
-      </form>
-    </div>
-  </div>
-</template>
-
-
 <script src="bower_components/jquery/dist/jquery.js"></script>
 <script src="bower_components/vue/dist/vue.js"></script>
 <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
 <script src="bower_components/moment/moment.js"></script>
 <script src="bower_components/moment/locale/ru.js"></script>
 <script src="bower_components/moment-range/dist/moment-range.js"></script>
-<script src="calendar.js"></script>
+<script src="./calendar.js"></script>
 <script>
   moment.locale('ru');
-  new Vue({
-    el: 'body'
-  });
+  new Vue({el: 'body'});
 </script>
 
 </body>

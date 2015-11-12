@@ -3,9 +3,9 @@
 var webpack = require('webpack');
 
 module.exports = {
-  entry: './main.js',
+  entry: './dist/main.js',
   output: {
-    filename: 'calendar.js'
+    filename: './dist/calendar.js'
   },
   module: {
     loaders: [
@@ -21,5 +21,5 @@ module.exports = {
   babel: {
     presets: [],
     plugins: []
-  },
+  }
 };

@@ -1,15 +1,5 @@
-.rk-range-calendar {
-    border: 1px solid #ccc;
-    width: 800px;
-    margin: 50px auto;
-}
-
-.rk-range-calendar > .panel-body {
-    height: 300px;
-}
-
-.rk-range-calendar .panel-heading {
-    text-align: center;
+.rk-range-calendar .rk-calendar-body {
+    min-height: 300px;
 }
 
 .rk-range-calendar a {
